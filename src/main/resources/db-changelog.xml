@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
-    <changeSet author="Dmitrii_Zavorin" id="2018-07-30--01-create-accounts-table">
+    <changeSet author="Hamada_Abdrabou" id="2018-07-30--01-create-accounts-table">
 
         <createTable schemaName="public" tableName="accounts">
             <column autoIncrement="true" name="id" type="bigint"/>
@@ -15,4 +15,19 @@
                        schemaName="public" tableName="accounts"/>
     </changeSet>
 
+    <changeSet author="Hamada_Abdrabou" id="2022-08-31--01-create-transaction-history-table">
+        <createTable schemaName="public" tableName="transaction_history">
+            <column autoIncrement="true" name="id" type="bigint"/>
+            <column name="transaction_time" type="datetime"/>
+            <column name="transfer_from_account" type="bigint"/>
+            <column name="transfer_to_account" type="bigint"/>
+            <column name="transfer_amount" type="double precision"/>
+        </createTable>
+        <addPrimaryKey columnNames="id" constraintName="pk_transaction_history"
+                       schemaName="public" tableName="transaction_history"/>
+        <addForeignKeyConstraint baseTableName="transaction_history" baseColumnNames="transfer_from_account" constraintName="fk_from_account" referencedTableName="accounts"
+                                 referencedColumnNames="id" onDelete="CASCADE"/>
+        <addForeignKeyConstraint baseTableName="transaction_history" baseColumnNames="transfer_to_account" constraintName="fk_to_account" referencedTableName="accounts"
+                                 referencedColumnNames="id" onDelete="CASCADE"/>
+    </changeSet>
 </databaseChangeLog>

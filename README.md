@@ -15,7 +15,7 @@ Service should expose a Rest API for `getting the account details`.
 - You can disregard currencies at this time.
 
 
-
+### Account API:
 **API Created**:
 
 **Get account**:
@@ -37,3 +37,18 @@ Service should expose a Rest API for `getting the account details`.
 **Money transfer**:
 
     PATCH localhost:8080/account/{fromId}/transfer/{toId}/{amount}
+
+
+### Transaction API:
+
+**Get debit transactions**:
+
+    GET localhost:8080/transaction-history/{id}/debit
+
+**Get credit transactions**:
+
+    GET localhost:8080/transaction-history/{id}/credit
+
+**Get transactions history**:
+
+    GET localhost:8080/transaction-history/{id}/history

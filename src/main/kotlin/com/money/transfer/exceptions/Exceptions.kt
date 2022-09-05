@@ -4,4 +4,5 @@ open class AccountServiceException(override val message: String) : RuntimeExcept
 
 class AccountNotFoundException: AccountServiceException("Account not found")
 
+class AccountAlreadyExistException: AccountServiceException("Account exists")
 class InsufficientFundsException: AccountServiceException("Insufficient funds")

@@ -19,22 +19,27 @@ interface IAccountService {
      * Retrieve account representation from db, throws NotFoundException if not present
      */
     fun get(id: Long): Account
+
     /**
      * Create new account with zero balance
      */
     fun create(): Account
+
     /**
      * Update account entity with new balance
      */
     fun update(acc: Account): Account
+
     /**
      * Withdraw money amount from account, throws InsufficientFundsException if balance is not enough
      */
     fun withdraw(id: Long, amount: BigDecimal): Account
+
     /**
      * Add money amount to account
      */
-    fun add(id: Long, amount : BigDecimal): Account
+    fun add(id: Long, amount: BigDecimal): Account
+
     /**
      * Transfer money amount between accounts, throws InsufficientFundsException if "from" account balance is not enough
      */
@@ -46,7 +51,10 @@ class AccountService : IAccountService {
 
     private val log by logger()
 
-    @Autowired private lateinit var accountRepository: AccountRepository
+    @Autowired
+    private lateinit var accountRepository: AccountRepository
+    @Autowired
+    private lateinit var transactionHistoryService: TransactionHistoryService
 
     @Transactional(readOnly = true)
     override fun get(id: Long) = accountRepository.getById(id).orElseThrow { AccountNotFoundException() }
@@ -62,7 +70,7 @@ class AccountService : IAccountService {
         log.info("Request to withdraw from $id amount $amount")
         amount.validateIsNegative()
         val account = get(id)
-        account.balance -= amount
+        account.balance-=amount
         return if (account.balance >= ZERO) accountRepository.save(account) else throw InsufficientFundsException()
     }
 
@@ -79,19 +87,25 @@ class AccountService : IAccountService {
     override fun transfer(from: Long, to: Long, amount: BigDecimal): AccountTransferPair {
         log.info("Request to transfer from $from to $to amount $amount")
         amount.validateIsNegative()
-        val accountFrom = get(from)
-        val accountTo = get(to)
-        accountFrom.balance -= amount
+        var accountFrom = get(from)
+        var accountTo = get(to)
+        accountFrom.balance-=amount
         return when {
             accountFrom.balance < ZERO -> throw InsufficientFundsException()
             else -> {
                 accountTo.balance += amount
-                AccountTransferPair(update(accountFrom), update(accountTo))
+                accountFrom = update(accountFrom)
+                accountTo = update(accountTo)
+                transactionHistoryService.create(accountFrom, accountTo, amount)
+                AccountTransferPair(accountFrom, accountTo)
             }
         }
+
     }
 
+
     private fun BigDecimal.validateIsNegative() =
-            if (this < ZERO) throw AccountServiceException("Illegal argument") else {}
+        if (this < ZERO) throw AccountServiceException("Illegal argument") else {
+        }
 
 }
